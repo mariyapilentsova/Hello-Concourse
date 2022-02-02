@@ -1,0 +1,33 @@
+---
+resources:
+- name: every-5m
+  type: time
+  icon: clock-outline
+  source:
+    interval: 5m
+- name: git-repo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/mariyapilentsova/Hello-Concourse
+
+jobs:
+- name: hello-sap
+  public: true
+  plan:
+  - in_parallel:
+    - get: git-repo
+      trigger: true
+    - get: every-5m
+      trigger: true
+  - task: run-my-awesome-script
+    config:
+      inputs:
+        - name: git-repo
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: { repository: busybox }
+      run:
+        path: sh
+        args: ["./git-repo/Hello_Concourse.sh"]
